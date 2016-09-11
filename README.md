@@ -22,3 +22,9 @@ Afterwards go to:
 # Architecture
 
 ![How does this work](https://editor.signavio.com/p/model/13c1f64109a541719fba650d0f717d78/png?inline&authkey=61a20c359cd2ba789477181175b5b22f47788194596d3a96392e6dea9eacd)
+
+# Screenshits
+
+![Desktop](/src/site/resources/img/Desktop-Screenshot.png?raw=true "Desktop")
+![Phone1](/src/site/resources/img/Phone1-Screenshot.png?raw=true "Desktop")
+![Phone2](/src/site/resources/img/Phone2-Screenshot.png?raw=true "Desktop")
