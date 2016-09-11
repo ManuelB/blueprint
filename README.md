@@ -17,7 +17,7 @@ mvn wildfly:run
 ```
 
 Afterwards go to:
-http://localhost:8080/blueprint/index.html
+<http://localhost:8080/blueprint/index.html>
 
 # Architecture
 
