@@ -1,0 +1,24 @@
+{
+  "name": "blueprint",
+  "version": "1.0.0",
+  "description": "Blueprint Architecture Application for Java EE 7, Olingo (OData) and OpenUI5",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-openui5": "^0.12.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ManuelB/blueprint.git"
+  },
+  "author": "Manuel Blechschmidt",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ManuelB/blueprint/issues"
+  },
+  "homepage": "https://github.com/ManuelB/blueprint#readme"
+}
