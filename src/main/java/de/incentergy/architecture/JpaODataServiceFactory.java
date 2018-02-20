@@ -27,6 +27,7 @@ public class JpaODataServiceFactory extends ODataJPAServiceFactory {
 	@Override
 	public ODataJPAContext initializeODataJPAContext() throws ODataJPARuntimeException {
 		ODataJPAContext oDataJPAContext = getODataJPAContext();
+		oDataJPAContext.setJPAEdmMappingModel("jpa-mapping-model.xml");
 		setDetailErrors(true);
 
 		InitialContext initialContext;
