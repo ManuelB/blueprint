@@ -1,5 +1,7 @@
 package de.incentergy.architecture;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,19 +17,45 @@ import javax.transaction.Status;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
+import org.apache.olingo.odata2.api.exception.MessageReference;
+import org.apache.olingo.odata2.api.exception.ODataException;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAContext;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAServiceFactory;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPATransaction;
 import org.apache.olingo.odata2.jpa.processor.api.exception.ODataJPARuntimeException;
+import org.apache.olingo.odata2.jpa.processor.api.factory.ODataJPAFactory;
 
 public class JpaODataServiceFactory extends ODataJPAServiceFactory {
 
 	private static Logger log = Logger.getLogger(JpaODataServiceFactory.class.getName());
 
+	ODataJPAContext oDataJPAContext;
+
+	private ODataJPAFactory oDataJPAFactory = new ODataJPAFactoryImpl();
+
+	static {
+		Class<?> classUtil;
+		try {
+			classUtil = ODataJPAFactory.class;
+			
+			// https://stackoverflow.com/questions/3301635/change-private-static-final-field-using-java-reflection
+			Field implementationField = classUtil.getDeclaredField("factoryImpl");
+			implementationField.setAccessible(true);
+			Field modifiersField = Field.class.getDeclaredField("modifiers");
+			modifiersField.setAccessible(true);
+			modifiersField.setInt(implementationField, implementationField.getModifiers() & ~Modifier.FINAL);
+			
+			// Reset the cache
+			implementationField.set(null, new ODataJPAFactoryImpl());
+		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e1) {
+			log.log(Level.WARNING, "Problem with modifying Olingo private final variable", e1);
+		}
+	}
+	
 	@Override
 	public ODataJPAContext initializeODataJPAContext() throws ODataJPARuntimeException {
-		ODataJPAContext oDataJPAContext = getODataJPAContext();
-		oDataJPAContext.setJPAEdmMappingModel("jpa-mapping-model.xml");
+
+		oDataJPAContext = getMyODataJPAContext();
 		setDetailErrors(true);
 
 		InitialContext initialContext;
@@ -88,6 +116,17 @@ public class JpaODataServiceFactory extends ODataJPAServiceFactory {
 		} catch (NamingException e) {
 			throw ODataJPARuntimeException.throwException(ODataJPARuntimeException.ENTITY_MANAGER_NOT_INITIALIZED, e);
 		}
+	}
+
+	/**
+	 * @return an instance of type {@link ODataJPAContext}
+	 * @throws ODataJPARuntimeException
+	 */
+	public final ODataJPAContext getMyODataJPAContext() throws ODataJPARuntimeException {
+		if (oDataJPAContext == null) {
+			oDataJPAContext = oDataJPAFactory.getODataJPAAccessFactory().createODataJPAContext();
+		}
+		return oDataJPAContext;
 	}
 
 }
