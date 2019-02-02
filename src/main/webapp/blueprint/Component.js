@@ -1,4 +1,4 @@
-sap.ui.define([ "sap/ui/core/UIComponent", "sap/ui/model/odata/v2/ODataModel", ],
+sap.ui.define([ "sap/ui/core/UIComponent", "sap/ui/model/odata/v2/ODataModel"],
 function(UIComponent, ODataModel) {
 	"use strict";
 	return UIComponent.extend("blueprint.Component", {
