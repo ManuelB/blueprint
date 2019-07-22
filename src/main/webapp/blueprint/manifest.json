@@ -42,6 +42,9 @@
 			"libs": {
 				"sap.m": {
 					
+				},
+				"sap.ui.layout": {
+					
 				}
 			}
 		},
