@@ -11,7 +11,7 @@
 		},
 		"dataSources": {
 			"Data.svc": {
-				"uri": "../Data.svc",
+				"uri": "../Data.svc?sap-context-token=1",
 				"type": "OData",
 				"settings": {
 					"odataVersion": "2.0"
