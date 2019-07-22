@@ -8,6 +8,15 @@
 		"description": "{{appDescription}}",
 		"applicationVersion": {
 			"version": "1.0.0"
+		},
+		"dataSources": {
+			"Data.svc": {
+				"uri": "../Data.svc?sap-context-token=1",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "2.0"
+				}
+			}
 		}
 	},
 	"sap.ui": {
@@ -19,16 +28,22 @@
 			"phone": true
 		},
 		"supportedThemes": [
-			"sap_belize"
+			"sap_fiori_3"
 		]
 	},
 	"sap.ui5": {
 		"_version": "1.1.0",
-		"rootView": "blueprint.view.App",
+		"rootView": {
+			"viewName": "blueprint.view.App",
+			"type": "XML"
+		},
 		"dependencies": {
-			"minUI5Version": "1.38",
+			"minUI5Version": "1.68.1",
 			"libs": {
 				"sap.m": {
+					
+				},
+				"sap.ui.layout": {
 					
 				}
 			}
@@ -38,6 +53,13 @@
 				"type": "sap.ui.model.resource.ResourceModel",
 				"settings": {
 					"bundleName": "blueprint.i18n.i18n"
+				}
+			},
+			"": {
+				"dataSource": "Data.svc",
+				"preload": true,
+				"settings": {
+					"defaultBindingMode": "TwoWay"
 				}
 			}
 		},
@@ -58,17 +80,26 @@
 				{
 					"pattern": "",
 					"name": "Home",
-					"target": ["todoList", "homeDetails"]
+					"target": [
+						"todoList",
+						"homeDetails"
+					]
 				},
 				{
 					"pattern": "Todos(':id:')",
 					"name": "Todos",
-					"target": ["todoList", "todoDetails"]
+					"target": [
+						"todoList",
+						"todoDetails"
+					]
 				},
 				{
 					"pattern": "addTodo",
 					"name": "addTodo",
-					"target": ["todoList", "todoDetails"]
+					"target": [
+						"todoList",
+						"todoDetails"
+					]
 				}
 			],
 			"targets": {
@@ -78,17 +109,17 @@
 					"controlAggregation": "detailPages"
 				},
 				"todoList": {
-					"viewName" : "TodoList",
+					"viewName": "TodoList",
 					"controlId": "splitApp",
 					"controlAggregation": "masterPages",
-					"clearControlAggregation" : true
+					"clearControlAggregation": true
 				},
-				"todoDetails" : {
+				"todoDetails": {
 					"viewName": "TodoDetails",
 					"controlId": "splitApp",
 					"controlAggregation": "detailPages"
 				},
-				"notFound" : {
+				"notFound": {
 					"viewName": "NotFound",
 					"transition": "show"
 				}
