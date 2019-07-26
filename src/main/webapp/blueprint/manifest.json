@@ -59,7 +59,8 @@
 				"dataSource": "Data.svc",
 				"preload": true,
 				"settings": {
-					"defaultBindingMode": "TwoWay"
+					"defaultBindingMode": "TwoWay",
+					"useBatch": false
 				}
 			}
 		},
