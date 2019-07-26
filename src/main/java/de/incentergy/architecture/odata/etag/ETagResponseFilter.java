@@ -5,8 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -45,10 +46,7 @@ public class ETagResponseFilter implements ContainerResponseFilter {
 			responseContext.getHeaders().add("Last-Modified", requestContext.getHeaderString("If-Modified-Since"));
 			responseContext.setEntity(null);
 		} else {
-			Calendar localCalendar = Calendar.getInstance();
-			localCalendar.set(Calendar.MILLISECOND, 0);
-			Date localDate = localCalendar.getTime();
-			responseContext.getHeaders().add("Last-Modified", localDate.getTime());
+			responseContext.getHeaders().add("Last-Modified", DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneOffset.UTC)));
 		}
 	}
 	
