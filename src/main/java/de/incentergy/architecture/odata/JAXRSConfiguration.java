@@ -10,7 +10,6 @@ import org.apache.olingo.odata2.core.rest.ODataExceptionMapperImpl;
 import org.apache.olingo.odata2.core.rest.ODataRootLocator;
 import org.apache.olingo.odata2.core.rest.app.AbstractODataApplication;
 
-import de.incentergy.architecture.odata.etag.ETagResponseFilter;
 
 /**
  * Configures a JAX-RS endpoint. Delete this class, if you are not exposing
@@ -24,7 +23,6 @@ public class JAXRSConfiguration extends AbstractODataApplication {
 		Set<Class<?>> set = new HashSet<>();
 		set.add(ODataRootLocator.class);
 		set.add(ODataExceptionMapperImpl.class);
-		// set.add(ETagResponseFilter.class);
 		return set;
 	}
 
