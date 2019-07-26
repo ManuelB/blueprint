@@ -1,7 +1,7 @@
 <mvc:View xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc"
 	controllerName="blueprint.controller.TodoList">
 	<Page title="Todo">
-		<List items="{/Todos}" itemPress="onItemPress" mode="MultiSelect" id="list">
+		<List items="{/Todos}" itemPress="onItemPress" mode="MultiSelect" growing="true" growingScrollToLoad="true" id="list">
 			<StandardListItem title="{Note}" description="{Id}"
 				type="Navigation" />
 		</List>
