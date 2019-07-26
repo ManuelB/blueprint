@@ -1,9 +1,12 @@
 package de.incentergy.architecture.entities;
 
+import java.sql.Timestamp;
 import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Version;
+
 
 @Entity
 public class Todo {
@@ -13,6 +16,10 @@ public class Todo {
     // @GenericGenerator(name = "uuid2", strategy = "uuid2")
 	@Id
 	private String id = UUID.randomUUID().toString();
+	
+	@Version
+	private Timestamp lastModified;
+	
 	private String note;
 	
 	public String getId() {
@@ -26,5 +33,11 @@ public class Todo {
 	}
 	public void setNote(String note) {
 		this.note = note;
+	}
+	public Timestamp getLastModified() {
+		return lastModified;
+	}
+	public void setLastModified(Timestamp lastModified) {
+		this.lastModified = lastModified;
 	}
 }

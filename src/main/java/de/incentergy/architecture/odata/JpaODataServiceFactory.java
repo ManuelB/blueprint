@@ -1,4 +1,4 @@
-package de.incentergy.architecture;
+package de.incentergy.architecture.odata;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,6 +41,7 @@ public class JpaODataServiceFactory extends ODataJPAServiceFactory {
 			oDataJPAContext.setEntityManagerFactory(entityManagerFactory);
 			oDataJPAContext.setPersistenceUnitName("blueprint");
 			oDataJPAContext.setContainerManaged(true);
+			oDataJPAContext.setJPAEdmExtension(new ETagJPAEDMExtension());
 			final UserTransaction userTransaction = (UserTransaction) initialContext
 					.lookup("java:comp/UserTransaction");
 			setODataJPATransaction(new ODataJPATransaction() {
