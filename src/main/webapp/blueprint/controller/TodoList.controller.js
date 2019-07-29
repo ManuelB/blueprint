@@ -1,6 +1,8 @@
 sap.ui.define([
-   "sap/ui/core/mvc/Controller"
-], function (Controller) {
+   "sap/ui/core/mvc/Controller",
+   "sap/ui/model/Filter",
+   "sap/ui/model/FilterOperator"
+], function (Controller, Filter, FilterOperator) {
    "use strict";
    return Controller.extend("blueprint.controller.TodoList", {
 	   onItemPress : function (oEvent) {
@@ -17,6 +19,13 @@ sap.ui.define([
 	   },
 	   onAdd : function (oEvent) {
 		   this.getOwnerComponent().getRouter().navTo("addTodo");
+	   },
+	   onRefresh: function () {
+		   this.byId("list").getBinding("items").refresh();
+	   },
+	   onSearch: function(oEvent) {
+		   this.byId("list").getBinding("items").filter(
+				   new Filter("Note", FilterOperator.Contains, oEvent.getParameter("newValue")));
 	   }
    });
 });

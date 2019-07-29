@@ -54,33 +54,35 @@ public class ETagODataJPAProcessor extends ODataJPADefaultProcessor {
 					ODataResponseBuilder oDataResponseBuilder = ODataResponse.newBuilder();
 					ODataResponse firstBatchResponseODataResponse = batchResponsePart.getResponses().get(0);
 					
-					InputStream inputStream = firstBatchResponseODataResponse.getEntityAsStream();
-		        	byte[] targetArray;
-					try {
-						targetArray = Util.getBytesFromInputStream(inputStream);
-						inputStream.close();
-						CircleStreamBuffer circleStreamBuffer = new CircleStreamBuffer();
-						circleStreamBuffer.getOutputStream().write(targetArray);
-						String etag = Util.getETagDigest(targetArray);
-						ODataRequest oDataRequest = batchPart.getRequests().get(0);
-						String ifNoneMatchHeader = oDataRequest.getRequestHeaderValue("If-None-Match");
-						
-						if ((ifNoneMatchHeader != null) && (ifNoneMatchHeader.equals(etag))) {
-							oDataResponseBuilder.status(HttpStatusCodes.NOT_MODIFIED);
-							oDataResponseBuilder.header("Last-Modified", oDataRequest.getRequestHeaderValue("If-Modified-Since"));
-						} else {
-							oDataResponseBuilder.status(firstBatchResponseODataResponse.getStatus());
-							oDataResponseBuilder.eTag(etag);
-							oDataResponseBuilder.header("Last-Modified", DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneOffset.UTC)));
-							oDataResponseBuilder.entity(circleStreamBuffer.getInputStream());
-							for (String key : firstBatchResponseODataResponse.getHeaderNames()) {
-								oDataResponseBuilder.header(key, firstBatchResponseODataResponse.getHeader(key));
+					if(firstBatchResponseODataResponse.getEntity() instanceof InputStream) {
+						InputStream inputStream = firstBatchResponseODataResponse.getEntityAsStream();
+			        	byte[] targetArray;
+						try {
+							targetArray = Util.getBytesFromInputStream(inputStream);
+							inputStream.close();
+							CircleStreamBuffer circleStreamBuffer = new CircleStreamBuffer();
+							circleStreamBuffer.getOutputStream().write(targetArray);
+							String etag = Util.getETagDigest(targetArray);
+							ODataRequest oDataRequest = batchPart.getRequests().get(0);
+							String ifNoneMatchHeader = oDataRequest.getRequestHeaderValue("If-None-Match");
+							
+							if ((ifNoneMatchHeader != null) && (ifNoneMatchHeader.equals(etag))) {
+								oDataResponseBuilder.status(HttpStatusCodes.NOT_MODIFIED);
+								oDataResponseBuilder.header("Last-Modified", oDataRequest.getRequestHeaderValue("If-Modified-Since"));
+							} else {
+								oDataResponseBuilder.status(firstBatchResponseODataResponse.getStatus());
+								oDataResponseBuilder.eTag(etag);
+								oDataResponseBuilder.header("Last-Modified", DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneOffset.UTC)));
+								oDataResponseBuilder.entity(circleStreamBuffer.getInputStream());
+								for (String key : firstBatchResponseODataResponse.getHeaderNames()) {
+									oDataResponseBuilder.header(key, firstBatchResponseODataResponse.getHeader(key));
+								}
 							}
+							batchResponsePart.getResponses().clear();
+							batchResponsePart.getResponses().add(oDataResponseBuilder.build());
+						} catch (IOException e) {
+							log.log(Level.SEVERE, "Could no process etag, e");
 						}
-						batchResponsePart.getResponses().clear();
-						batchResponsePart.getResponses().add(oDataResponseBuilder.build());
-					} catch (IOException e) {
-						log.log(Level.SEVERE, "Could no process etag, e");
 					}
 				}
 				batchResponseParts.add(batchResponsePart);

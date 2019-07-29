@@ -57,6 +57,7 @@
 			},
 			"": {
 				"dataSource": "Data.svc",
+				"type": "blueprint.model.ETagODataModel",
 				"preload": true,
 				"settings": {
 					"defaultBindingMode": "TwoWay"
