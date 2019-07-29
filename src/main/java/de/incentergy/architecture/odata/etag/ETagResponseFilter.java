@@ -1,10 +1,7 @@
 package de.incentergy.architecture.odata.etag;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -17,6 +14,8 @@ import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
 
 import org.apache.olingo.odata2.core.ep.util.CircleStreamBuffer;
+
+import de.incentergy.architecture.io.Util;
 
 @Provider
 public class ETagResponseFilter implements ContainerResponseFilter {
@@ -37,11 +36,11 @@ public class ETagResponseFilter implements ContainerResponseFilter {
 			return;
 		}
 		
-		String md5Hash = getMd5Digest(arrayOfByte);
-		responseContext.getHeaders().add("ETag", md5Hash);
+		String etag = Util.getETagDigest(arrayOfByte);
+		responseContext.getHeaders().add("ETag", etag);
 		String ifNoneMatchHeader = requestContext.getHeaderString("If-None-Match");
 		
-		if ((ifNoneMatchHeader != null) && (ifNoneMatchHeader.equals(md5Hash))) {
+		if ((ifNoneMatchHeader != null) && (ifNoneMatchHeader.equals(etag))) {
 			responseContext.setStatus(304);
 			responseContext.getHeaders().add("Last-Modified", requestContext.getHeaderString("If-Modified-Since"));
 			responseContext.setEntity(null);
@@ -55,7 +54,7 @@ public class ETagResponseFilter implements ContainerResponseFilter {
         	Object entity = responseContext.getEntity();
         	if(entity instanceof InputStream) {
 	        	InputStream initialStream = (InputStream) entity;
-	        	byte[] targetArray = getBytesFromInputStream(initialStream);
+	        	byte[] targetArray = Util.getBytesFromInputStream(initialStream);
 	            CircleStreamBuffer circleStreamBuffer = new CircleStreamBuffer();
 	            circleStreamBuffer.getOutputStream().write(targetArray);
 	            responseContext.setEntity(circleStreamBuffer.getInputStream());
@@ -65,28 +64,5 @@ public class ETagResponseFilter implements ContainerResponseFilter {
         }
         return new byte[] {};
     }
-    
-    public static byte[] getBytesFromInputStream(InputStream is) throws IOException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream(); 
-        byte[] buffer = new byte[0xFFFF];
-        for (int len = is.read(buffer); len != -1; len = is.read(buffer)) { 
-            os.write(buffer, 0, len);
-        }
-        return os.toByteArray();
-    }
-
-	private String getMd5Digest(byte[] paramArrayOfByte) {
-		MessageDigest localMessageDigest;
-		try {
-			localMessageDigest = MessageDigest.getInstance("MD5");
-		} catch (Exception localException) {
-			throw new RuntimeException("MD5 cryptographic algorithm is not available.", localException);
-		}
-		byte[] arrayOfByte = localMessageDigest.digest(paramArrayOfByte);
-		BigInteger localBigInteger = new BigInteger(1, arrayOfByte);
-		StringBuilder localStringBuilder = new StringBuilder(48);
-		localStringBuilder.append(localBigInteger.toString(16));
-		return localStringBuilder.toString();
-	}
 
 }

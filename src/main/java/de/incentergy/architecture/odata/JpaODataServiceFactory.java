@@ -15,6 +15,7 @@ import javax.transaction.Status;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
+import org.apache.olingo.odata2.api.processor.ODataSingleProcessor;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAContext;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAServiceFactory;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPATransaction;
@@ -41,6 +42,7 @@ public class JpaODataServiceFactory extends ODataJPAServiceFactory {
 			oDataJPAContext.setEntityManagerFactory(entityManagerFactory);
 			oDataJPAContext.setPersistenceUnitName("blueprint");
 			oDataJPAContext.setContainerManaged(true);
+			oDataJPAContext.setODataProcessor(new ETagODataJPAProcessor(oDataJPAContext));
 			oDataJPAContext.setJPAEdmExtension(new ETagJPAEDMExtension());
 			final UserTransaction userTransaction = (UserTransaction) initialContext
 					.lookup("java:comp/UserTransaction");
@@ -89,5 +91,9 @@ public class JpaODataServiceFactory extends ODataJPAServiceFactory {
 			throw ODataJPARuntimeException.throwException(ODataJPARuntimeException.ENTITY_MANAGER_NOT_INITIALIZED, e);
 		}
 	}
+	
+	public ODataSingleProcessor createCustomODataProcessor(ODataJPAContext oDataJPAContext) {
+	    return (ODataSingleProcessor) oDataJPAContext.getODataProcessor();
+	  }
 
 }
