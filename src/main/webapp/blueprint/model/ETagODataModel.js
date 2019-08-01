@@ -22,7 +22,9 @@ function(ODataModel, CacheManager) {
 			var pCacheLoaded = new Promise(function (fnResolve) {			
 				// Read cache from persistent cache
 				CacheManager.get("ETagUrlCache").then(function(sETagUrlCache) {
-					this.oETagUrlCache = JSON.parse(sETagUrlCache);
+					if(sETagUrlCache !== undefined) {
+					    this.oETagUrlCache = JSON.parse(sETagUrlCache);
+					}
 					fnResolve();
 				}.bind(this));
 			}.bind(this));
