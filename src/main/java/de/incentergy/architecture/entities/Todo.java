@@ -7,8 +7,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Version;
 
+import de.incentergy.architecture.odata.annotations.ODataCacheControl;
+
 
 @Entity
+@ODataCacheControl(maxAge = 5) // this odata entity set should be cached for 5 seconds
 public class Todo {
 	// generating uuids might be expensive
 	// use with hibernate:

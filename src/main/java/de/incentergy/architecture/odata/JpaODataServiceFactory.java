@@ -42,7 +42,7 @@ public class JpaODataServiceFactory extends ODataJPAServiceFactory {
 			oDataJPAContext.setEntityManagerFactory(entityManagerFactory);
 			oDataJPAContext.setPersistenceUnitName("blueprint");
 			oDataJPAContext.setContainerManaged(true);
-			oDataJPAContext.setODataProcessor(new ETagODataJPAProcessor(oDataJPAContext));
+			oDataJPAContext.setODataProcessor(new ETagCacheControlODataJPAProcessor(oDataJPAContext));
 			oDataJPAContext.setJPAEdmExtension(new ETagJPAEDMExtension());
 			final UserTransaction userTransaction = (UserTransaction) initialContext
 					.lookup("java:comp/UserTransaction");

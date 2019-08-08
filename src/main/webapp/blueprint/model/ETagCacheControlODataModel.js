@@ -1,7 +1,7 @@
 sap.ui.define(["sap/ui/model/odata/v2/ODataModel", "sap/ui/core/cache/CacheManager"],
 function(ODataModel, CacheManager) {
 	"use strict";
-	return ODataModel.extend("blueprint.model.ETagODataModel", {
+	return ODataModel.extend("blueprint.model.ETagCacheControlODataModel", {
 
 		constructor: function () {
 			ODataModel.apply(this, arguments);
@@ -32,26 +32,38 @@ function(ODataModel, CacheManager) {
 			this.oMetadata.pLoaded = Promise.all([pMetadataLoaded, pCacheLoaded]);
 		},
 		_updateETag : function(oRequest, oResponse) {
-			// Add the body of every request with the url ot our internal map
-			if("ETag" in oResponse.headers) {
-				var sUrl = oRequest.requestUri.replace(this.sServiceUrl + '/', '');
-				if (!sUrl.startsWith("/")) {
-					sUrl = "/" + sUrl;
-				}
+			var sUrl = oRequest.requestUri.replace(this.sServiceUrl + '/', '');
+			if (!sUrl.startsWith("/")) {
+				sUrl = "/" + sUrl;
+			}
+			// Add the body of every request with the url to our cache
+			// do not add responses that already come from the cache
+			if(!oResponse.cache && "ETag" in oResponse.headers) {
 				var contentType = "";
 				if("Content-Type" in oResponse.headers) {					
 					contentType = oResponse.headers["Content-Type"];
 				}
-				this.oETagUrlCache[sUrl] = {
+				var oCacheEntry = {
 					"ETag": oResponse.headers.ETag,
 					"statusCode": oResponse.statusCode,
 					"body": oResponse.body,
 					"data": contentType.match(/^application\/json.*/) ? JSON.parse(oResponse.body).d : oResponse.body, 
-					"Content-Type": contentType
-				}
+					"headers": oResponse.headers,
+					"Content-Type": contentType,
+					"cache": true
+				};
+				this.oETagUrlCache[sUrl] = oCacheEntry;
 				
 				CacheManager.set("ETagUrlCache", JSON.stringify(this.oETagUrlCache));
 				
+			}
+			// Add an expiration in microseconds from 1970 UTC in milliseconds
+			if(!oResponse.cache && "Cache-Control" in oResponse.headers && oResponse.headers["Cache-Control"].match(/max-age=(\d+)$/)) {	
+				var oNow = new Date();
+				// Update Expires to the given date
+				if(sUrl in this.oETagUrlCache) {
+					this.oETagUrlCache[sUrl]["Expires"] = oNow.getTime() + oNow.getTimezoneOffset() * 60000 + (RegExp.$1*1000);
+				}
 			}
 			return ODataModel.prototype._updateETag.apply(this, arguments);
 		},
@@ -65,6 +77,58 @@ function(ODataModel, CacheManager) {
 				oRequest.headers["If-None-Match"] = this.oETagUrlCache[sUrl].ETag;
 			}
 			return oRequest;
+		},
+		_submitRequest : function(oRequest, fnSuccess, fnError) {
+			var fnSuccessWrapper = fnSuccess;
+			if("data" in oRequest && "__batchRequests" in oRequest.data) {
+				var aResponsesFromCache = [];
+				for(var i=0;i<oRequest.data.__batchRequests.length; i++) {
+					var oBatchRequest = oRequest.data.__batchRequests[i];
+					var oNow = new Date();
+					var iNowInMicroseconds = oNow.getTime() + oNow.getTimezoneOffset() * 60000;
+					var sUrl = "/"+oBatchRequest.requestUri;
+					if(oBatchRequest.method === "GET" && sUrl in this.oETagUrlCache && "Expires" in this.oETagUrlCache[sUrl] && iNowInMicroseconds < this.oETagUrlCache[sUrl].Expires) {
+						var oCacheEntry = this.oETagUrlCache[sUrl];
+						aResponsesFromCache.push({
+							index: i,
+							request: oBatchRequest,
+							response: oCacheEntry
+						});
+					}
+				}
+				// remove all request where the answer will come from the cache
+				oRequest.data.__batchRequests = oRequest.data.__batchRequests.filter(function (o,i) {
+					return aResponsesFromCache.filter(function (o) { return o.index == i; }).length == 0;
+				});
+				fnSuccessWrapper = function (oData, oResponse) {
+					for(var i in aResponsesFromCache) {
+						var oCacheItem = aResponsesFromCache[i];
+						oRequest.data.__batchRequests.splice(oCacheItem.index, 0, oCacheItem.request);
+						oData.__batchResponses.splice(oCacheItem.index, 0, oCacheItem.response);
+						// oResponse.data.__batchResponses.splice(oCacheItem.index, 0, oCacheItem.response);
+					}
+					fnSuccess.apply(fnSuccess, [oData, oResponse]);
+				};
+			}
+			// if all requests can be answered from the cache
+			if(oRequest.data.__batchRequests.length == 0) {
+				var oSuccessData= {"__batchResponses":[]};
+				fnSuccessWrapper(oSuccessData, {
+					"data": oSuccessData,
+					"requestUri": oRequest.requestUri,
+					"headers": {"Content-Type": "multipart/mixed"},
+					"status": 203,
+					"statusText": "Non-Authoritative Information"
+				});
+				return {
+					"abort": function() {
+						
+					}
+				}
+			} else {				
+				var retVal =  ODataModel.prototype._submitRequest.apply(this, [oRequest, fnSuccessWrapper, fnError]);
+				return retVal;
+			}
 		},
 		_getODataHandler: function (sUrl) {
 			var oHandler = ODataModel.prototype._getODataHandler.apply(this, arguments);
