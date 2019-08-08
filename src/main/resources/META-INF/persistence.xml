@@ -8,10 +8,10 @@
 		<properties>
 			<property name="javax.persistence.schema-generation.database.action"
 				value="drop-and-create" />
-			<!-- Bind entity manager factory to JNDI at java:jboss/myEntityManagerFactory -->
+			<!-- Bind entity manager factory to JNDI at java:jboss/blueprintEntityManagerFactory -->
 			<property name="jboss.entity.manager.factory.jndi.name"
-				value="java:/myEntityManagerFactory" />
-			<property name="jboss.entity.manager.jndi.name" value="java:/myEntityManager" />
+				value="java:/blueprintEntityManagerFactory" />
+			<property name="jboss.entity.manager.jndi.name" value="java:/blueprintEntityManager" />
 		</properties>
 	</persistence-unit>
 </persistence>

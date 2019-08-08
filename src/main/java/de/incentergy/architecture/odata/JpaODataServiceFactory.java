@@ -35,10 +35,10 @@ public class JpaODataServiceFactory extends ODataJPAServiceFactory {
 			initialContext = new InitialContext();
 			// BeanManager beanManager = (BeanManager)
 			// initialContext.lookup("java:comp/BeanManager");
-			EntityManager entityManager = (EntityManager) initialContext.lookup("java:/myEntityManager");
+			EntityManager entityManager = (EntityManager) initialContext.lookup("java:/blueprintEntityManager");
 			oDataJPAContext.setEntityManager(entityManager);
 			EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initialContext
-					.lookup("java:/myEntityManagerFactory");
+					.lookup("java:/blueprintEntityManagerFactory");
 			oDataJPAContext.setEntityManagerFactory(entityManagerFactory);
 			oDataJPAContext.setPersistenceUnitName("blueprint");
 			oDataJPAContext.setContainerManaged(true);
